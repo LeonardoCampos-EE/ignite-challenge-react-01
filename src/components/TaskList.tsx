@@ -1,74 +1,116 @@
-import { useState } from 'react'
+import { useState } from "react";
 
-import '../styles/tasklist.scss'
+import "../styles/tasklist.scss";
 
-import { FiTrash, FiCheckSquare } from 'react-icons/fi'
+import { FiTrash, FiCheckSquare } from "react-icons/fi";
 
 interface Task {
-  id: number;
-  title: string;
-  isComplete: boolean;
+    id: number;
+    title: string;
+    isComplete: boolean;
 }
 
 export function TaskList() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [newTaskTitle, setNewTaskTitle] = useState("");
 
-  function handleCreateNewTask() {
-    // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
-  }
+    function generateId(min: number, max: number) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
 
-  function handleToggleTaskCompletion(id: number) {
-    // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
-  }
+    function handleCreateNewTask() {
+        // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
 
-  function handleRemoveTask(id: number) {
-    // Remova uma task da listagem pelo ID
-  }
+        if (newTaskTitle == "") {
+            return;
+        }
 
-  return (
-    <section className="task-list container">
-      <header>
-        <h2>Minhas tasks</h2>
+        const newTask: Task = {
+            id: generateId(1, 15000),
+            title: newTaskTitle,
+            isComplete: false,
+        };
 
-        <div className="input-group">
-          <input 
-            type="text" 
-            placeholder="Adicionar novo todo" 
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            value={newTaskTitle}
-          />
-          <button type="submit" data-testid="add-task-button" onClick={handleCreateNewTask}>
-            <FiCheckSquare size={16} color="#fff"/>
-          </button>
-        </div>
-      </header>
+        let tmpTasks = [...tasks];
+        tmpTasks.push(newTask);
+        setTasks(tmpTasks);
+        setNewTaskTitle("");
+    }
 
-      <main>
-        <ul>
-          {tasks.map(task => (
-            <li key={task.id}>
-              <div className={task.isComplete ? 'completed' : ''} data-testid="task" >
-                <label className="checkbox-container">
-                  <input 
-                    type="checkbox"
-                    readOnly
-                    checked={task.isComplete}
-                    onClick={() => handleToggleTaskCompletion(task.id)}
-                  />
-                  <span className="checkmark"></span>
-                </label>
-                <p>{task.title}</p>
-              </div>
+    function handleToggleTaskCompletion(id: number) {
+        // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+        let currentTask = tasks.filter((task) => task.id == id)[0];
+        let index = tasks.indexOf(currentTask);
+        currentTask.isComplete = !currentTask.isComplete;
+        let tmpTasks = [...tasks];
+        tmpTasks[index] = currentTask;
+        setTasks(tmpTasks);
+    }
 
-              <button type="button" data-testid="remove-task-button" onClick={() => handleRemoveTask(task.id)}>
-                <FiTrash size={16}/>
-              </button>
-            </li>
-          ))}
-          
-        </ul>
-      </main>
-    </section>
-  )
+    function handleRemoveTask(id: number) {
+        let filtered = tasks.filter(function (value, index, arr) {
+            return value.id != id;
+        });
+        setTasks(filtered);
+    }
+
+    return (
+        <section className="task-list container">
+            <header>
+                <h2>Minhas tasks</h2>
+
+                <div className="input-group">
+                    <input
+                        type="text"
+                        placeholder="Adicionar novo todo"
+                        onChange={(e) => setNewTaskTitle(e.target.value)}
+                        value={newTaskTitle}
+                    />
+                    <button
+                        type="submit"
+                        data-testid="add-task-button"
+                        onClick={handleCreateNewTask}
+                    >
+                        <FiCheckSquare size={16} color="#fff" />
+                    </button>
+                </div>
+            </header>
+
+            <main>
+                <ul>
+                    {tasks.map((task) => (
+                        <li key={task.id}>
+                            <div
+                                className={task.isComplete ? "completed" : ""}
+                                data-testid="task"
+                            >
+                                <label className="checkbox-container">
+                                    <input
+                                        type="checkbox"
+                                        readOnly
+                                        checked={task.isComplete}
+                                        onClick={() =>
+                                            handleToggleTaskCompletion(task.id)
+                                        }
+                                    />
+                                    <span className="checkmark"></span>
+                                </label>
+                                <p>{task.title}</p>
+                            </div>
+
+                            <button
+                                type="button"
+                                data-testid="remove-task-button"
+                                onClick={() => handleRemoveTask(task.id)}
+                            >
+                                <FiTrash size={16} />
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </main>
+        </section>
+    );
 }
